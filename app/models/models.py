@@ -4,12 +4,12 @@ from app.domain.enums.report_status_enums import ReportStatusEnum
 from app.domain.rules.email_domain_validator import EmailDomainValidator
 from app.exeception.domain.user_domain_exeception import CpfInvalid, PasswordInvalid
 from app.infrastructure.database.connect_database import Base
-from sqlalchemy import Column,String,Boolean,Integer,Text,Enum,DateTime,Float
+from sqlalchemy import Column,String,Boolean,Integer,Text,Enum,DateTime,Float,ForeignKey
 import re
 from passlib.context import CryptContext
 from validate_docbr import CPF
 from datetime import datetime
-
+from sqlalchemy.orm import relationship, declarative_base
 
 class User(Base):
     __tablename__ = "users"
@@ -52,20 +52,25 @@ class User(Base):
         
         return True
 
-class Report(Base):
-    __tablename__ = "reports"
+class Complaint(Base):
+    __tablename__ = "complaints"
 
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     cpf = Column(String(13), nullable=False, unique=True)
     category = Column(Enum(CategoryEnum, name="category"), nullable=False)
     status = Column(Enum(ReportStatusEnum, name="report_status"), nullable=True, server_default=ReportStatusEnum.PENDING.value)
+    
     longitude = Column(Float, nullable=False)
     latitude = Column(Float, nullable=False)
     image_url = Column(String(80), nullable=False)
     description = Column(Text, nullable=True)
+    
     created_at = Column(DateTime,nullable=False,server_default=func.now())
     updated_at = Column(DateTime,nullable=False,server_default=func.now(),onupdate=func.now())
-  
+    
+    address = relationship("Address", back_populates="complaint", uselist=False, cascade="all, delete-orphan")
+ 
+
     def __init__(
             self,
             cpf: str,
@@ -77,7 +82,7 @@ class Report(Base):
             status: ReportStatusEnum = ReportStatusEnum.PENDING.value
         ):
 
-        self.cpf = cpf
+        self.__validateCPf(cpf)
         self.category = category
         self.status = status
         self.longitude = longitude
@@ -91,13 +96,7 @@ class Report(Base):
         self.updated_at = datetime.utcnow()
 
 
-    # auditoria #
-    def _touch(self):
-        self.updated_at = datetime.utcnow()
-
-
-     #alteração
-    def create_new_cpf(self,cpf: str):
+    def __validateCPf(self,cpf: str) -> None:
 
         #validar cpf
         cpfValidator = CPF()
@@ -106,7 +105,29 @@ class Report(Base):
             raise CpfInvalid("CPF inválido",400)
         
         self.cpf = str(cpf)
-        
+
+    # auditoria #
+    def _touch(self):
+        self.updated_at = datetime.utcnow()
+
+
+    
+class Address(Base):
+    __tablename__ = "addresses"
+ 
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=False, unique=True)
+    street = Column(String(150), nullable=True)
+    city = Column(String(100), nullable=False)
+    state = Column(String(2),   nullable=False)
+ 
+    complaint = relationship("Complaint", back_populates="address")
+ 
+    def __init__(self, report_id: int, city: str, state: str, street: str | None = None):
+        self.report_id = report_id
+        self.street = street
+        self.city = city
+        self.state = state       
 
 # 1. Gerar nova migração com as alterações
  #alembic revision --autogenerate -m "first migration"
