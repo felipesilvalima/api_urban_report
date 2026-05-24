@@ -6,25 +6,36 @@ import logging
 from app.logs.config import logger
 
 from app.exeception.domain.api_cep_domain_exeception import CepNotFound, InternalError, LimitRate, ValidationError
-class Cep:
 
-    attempts = 3
-    max_retries = 3
+class ClientHttp:
 
-    def get_cep(self,cep: str):
+    def __init__(
+            self,
+            base_url: str,
+            headers: dict,
+            max_retries: int = 3,
+            timeout: int = 5,
+            timeout_delay: int = 4
+
+        ):
+
+        self.base_url = base_url
+        self.headers = headers
+        self.max_retries = max_retries
+        self.timeout = timeout
+        self.timeout_delay = timeout_delay
+
+    
+
+    def get(self,endpoint: str, params: any | None = None):
         
-        base_url = os.getenv("BASE_URL_CEP")
+        url = f"{self.base_url}/{endpoint}"
 
-        url = f"{base_url}/{cep}"
-
-        headers = {
-            "Content-Type": "application/json"
-        }
-
-        for attempt in range(self.attempts):
+        #retry
+        for attempt in range(self.max_retries):
         
             try:
-                resp = requests.get(url,headers=headers,timeout=5)
+                resp = requests.get(url,headers=self.headers,timeout=self.timeout,params=params)
 
                 self.__treatment_code(resp.status_code)
                 
@@ -32,23 +43,23 @@ class Cep:
             except requests.exceptions.Timeout as e:
                 logger.warning(f"Timeout na tentativa {attempt}/{self.max_retries} - URL: {url}")
                 if attempt == self.max_retries:
-                    logger.error(f"Timeout persistente após {max_retries} tentativas - URL: {url}")
+                    logger.error(f"Timeout persistente após {self.max_retries} tentativas - URL: {url}")
                     raise RequestException("Serviço externo lento")
-                time.sleep(5)
+                time.sleep(self.timeout_delay)
         
             except requests.exceptions.ConnectionError as e:
                 logger.error(f"Erro de conexão na tentativa {attempt}/{self.max_retries} - URL: {url} - Detalhe: {str(e)}")
                 if attempt == self.max_retries:
                     logger.critical(f"Conexão falhou permanentemente - URL: {url}")
                     raise RequestException("Error de conexão com a api externa")
-                time.sleep(5)
+                time.sleep(self.timeout_delay)
         
             except requests.exceptions.RequestException as e:
                 logger.exception(f"Erro inesperado na tentativa {attempt}/{self.max_retries} - URL: {url}")  # exception mostra stacktrace
                 if attempt == self.max_retries:
                     logger.critical(f"Erro desconhecido persistente - URL: {url}")
                     raise RequestException("Error desconhecido")
-                time.sleep(5)
+                time.sleep(self.timeout_delay)
 
     def __treatment_code(self,code: int):
 
