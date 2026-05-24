@@ -2,11 +2,7 @@ import requests
 from requests.exceptions import RequestException, HTTPError, ConnectionError, Timeout
 import time
 import os
-import logging
 from app.logs.config import logger
-
-from app.exeception.domain.api_cep_domain_exeception import CepNotFound, InternalError, LimitRate, ValidationError
-
 class ClientHttp:
 
     def __init__(
@@ -27,7 +23,7 @@ class ClientHttp:
 
     
 
-    def get(self,endpoint: str, params = None):
+    def get(self,endpoint: str,handler_status_code = None, params = None):
         
         url = f"{self.base_url}/{endpoint}"
         
@@ -37,7 +33,8 @@ class ClientHttp:
             try:
                 resp = requests.get(url,headers=self.headers,timeout=self.timeout,params=params)
 
-                self.__treatment_code(resp.status_code)
+                if handler_status_code:
+                    handler_status_code(resp.status_code)
 
                 return resp.json()
             except requests.exceptions.Timeout as e:
@@ -61,31 +58,6 @@ class ClientHttp:
                     raise RequestException("Error desconhecido")
                 time.sleep(self.timeout_delay)
 
-    def __treatment_code(self,code: int):
-
-        match code:
-            case 429:
-                logger.warning(f"Rate limit atingido Tentativa: {self.attempt}")
-                logger.info(f"Aguardando 60 segundos antes de nova tentativa")
-                raise LimitRate("Limite de requisições atingida")
-        
-            case 400:
-                logger.error(f"CEP inválido ou mal formatado. Status: 400")
-                logger.debug(f"Headers enviados")
-                raise ValidationError("CEP inválido ou mal formatado.")
-        
-            case 404:
-                logger.info(f"CEP não encontrado. Status: 404")
-                logger.debug(f"Provedores consultados: ViaCEP, OpenCEP, APICEP")
-                raise CepNotFound("CEP não encontrado em nenhum provedor.")
-        
-            case 500:
-                logger.critical(f"Erro interno no serviço de CEP - Status: 500")
-                logger.error(f"Possível problema no servidor da API de CEP")
-                raise InternalError("Erro interno no serviço de CEP.", 500)
-        
-            case _:
-                logger.warning(f"Status code não tratado: {code}")
-                return True
+    
 
 

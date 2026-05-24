@@ -12,7 +12,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 # Importar os modelos e a Base
 from app.infrastructure.database.connect_database import Base
-from app.models.models import User, Report # Importe todos os modelos aqui
+from app.models.models import User, Complaint,Address # Importe todos os modelos aqui
 
 
 # this is the Alembic Config object, which provides
