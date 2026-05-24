@@ -1,11 +1,15 @@
 import os
 from re import search
-
+from app.exeception.domain.api_cep_domain_exeception import CepNotFound
+from dotenv import load_dotenv
 from app.infrastructure.http.client_http import ClientHttp
 
 class Cep:
 
     def __init__(self):
+
+        load_dotenv()
+
         self.base_url = os.getenv("BASE_URL_CEP")
         self.token = os.getenv("TOKEN_CEP_ABERTO")
 
@@ -16,7 +20,7 @@ class Cep:
 
         self.http = ClientHttp(
             base_url=self.base_url,
-            default_headers=headers,
+            headers=headers,
         )
 
         
@@ -24,6 +28,11 @@ class Cep:
 
         url = f"cep?cep={cep}"
 
-        result = self.http.get(
+        address = self.http.get(
             url
         )
+
+        if not address:
+            raise CepNotFound("Endereço não encontrado.")
+        
+        return address

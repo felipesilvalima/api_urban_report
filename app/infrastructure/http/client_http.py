@@ -27,18 +27,18 @@ class ClientHttp:
 
     
 
-    def get(self,endpoint: str, params: any | None = None):
+    def get(self,endpoint: str, params = None):
         
         url = f"{self.base_url}/{endpoint}"
-
+        
         #retry
         for attempt in range(self.max_retries):
-        
+
             try:
                 resp = requests.get(url,headers=self.headers,timeout=self.timeout,params=params)
 
                 self.__treatment_code(resp.status_code)
-                
+
                 return resp.json()
             except requests.exceptions.Timeout as e:
                 logger.warning(f"Timeout na tentativa {attempt}/{self.max_retries} - URL: {url}")
@@ -86,5 +86,6 @@ class ClientHttp:
         
             case _:
                 logger.warning(f"Status code não tratado: {code}")
+                return True
 
 
