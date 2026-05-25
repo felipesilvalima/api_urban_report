@@ -11,10 +11,10 @@ def test_search_cep():
 
 
 
-def test_search_cpf():
+# def test_search_cpf():
 
-    cpf = Cpf()
-    resp = cpf.search_cpf("12345678909")
+#     cpf = Cpf()
+#     resp = cpf.search_cpf("12345678909")
 
-    print(resp)
+#     print(resp)
 

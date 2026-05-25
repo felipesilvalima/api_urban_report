@@ -117,15 +117,17 @@ class Address(Base):
  
     id = Column(Integer, primary_key=True, autoincrement=True)
     complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=False, unique=True)
-    street = Column(String(150), nullable=True)
+    street = Column(String(150), nullable=False)
+    neighborhood = Column(String(250),   nullable=False)
     city = Column(String(100), nullable=False)
     state = Column(String(2),   nullable=False)
  
     complaint = relationship("Complaint", back_populates="address")
  
-    def __init__(self, report_id: int, city: str, state: str, street: str | None = None):
-        self.report_id = report_id
+    def __init__(self, complaint_id: int, city: str, state: str,neighborhood: str, street: str | None = None):
+        self.complaint_id = complaint_id
         self.street = street
+        self.neighborhood = neighborhood
         self.city = city
         self.state = state       
 

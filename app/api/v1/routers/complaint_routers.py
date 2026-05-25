@@ -21,4 +21,6 @@ async def create_new_complaint(
     complaintSchema: ComaplaintSchema,
     complaint_service: ComplaintService = Depends(instancia_complaint)
 ):
-    return complaint_service.create_comaplaint_service()
+    complainted = complaint_service.create_comaplaint_service(complaintSchema)
+
+    return complainted,201

@@ -41,10 +41,7 @@ class ComaplaintSchema(BaseModel):
     @field_validator("category")
     def category_validater(cls, category):
 
-        if len(category) == 0:
-            raise HTTPException(status_code=400, detail="Categória é Obrigatório!")
-        
-        if not category in CategoryEnum.__members__:
+        if category.name not in CategoryEnum.__members__:
             raise HTTPException(status_code=400, detail="Categória não encontrada!")
         
         return category
