@@ -72,41 +72,61 @@ class ComaplaintSchema(BaseModel):
 
 
 
-class ImageUpload(BaseModel):
+# complaintSchema.py
 
-    image: UploadFile
-
-    @field_validator("image")
-    async def image_validater(cls, image):
-
-        if image == None:
-            raise HTTPException(status_code=400, detail="Imagem é Obrigatória")
-        
-
-        # VALIDAÇÃO DE EXTENSÃO
-        extensoes_permitidas = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+class ImageValidator:
+    """Validações para imagens"""
     
-        # Verificar pelo filename
-        if not any(image.filename.lower().endswith(ext) for ext in extensoes_permitidas):
+    MAX_SIZE_MB = 5
+    MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
+    
+    EXTENSOES_PERMITIDAS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+    MIMES_PERMITIDOS = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
+    
+    @classmethod
+    def obter_extensao(cls, filename: str) -> str:
+        """Extrai extensão do nome do arquivo"""
+        if not filename or '.' not in filename:
+            return ''
+        
+        # Pega a extensão (ex: .jpg, .png)
+        extensao = f".{filename.rsplit('.', 1)[-1].lower()}"
+        return extensao
+    
+    @classmethod
+    async def validar_image(cls, file) -> tuple:
+        """Valida a imagem e retorna (conteudo, extensao)"""
+        
+        # 1. Valida extensão
+        if not file.filename:
+            raise HTTPException(400, "Arquivo sem nome")
+        
+        extensao = cls.obter_extensao(file.filename)  # 👈 Agora funciona
+        
+        if extensao not in cls.EXTENSOES_PERMITIDAS:
             raise HTTPException(
-                status_code=400,
-                detail=f"Extensão não permitida. Use: {', '.join(extensoes_permitidas)}"
+                400,
+                f"Extensão '{extensao}' não permitida. Use: {', '.join(cls.EXTENSOES_PERMITIDAS)}"
             )
         
-        # VALIDAÇÃO DE TAMANHO
-        MAX_SIZE_MB = 5
-        MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
-    
-        # Lê o conteúdo para verificar tamanho
-        conteudo = await image.read()
+        # 2. Valida MIME type
+        if file.content_type not in cls.MIMES_PERMITIDOS:
+            raise HTTPException(
+                400,
+                f"Tipo de arquivo '{file.content_type}' não permitido"
+            )
+        
+        # 3. Valida tamanho
+        conteudo = await file.read()
         tamanho_bytes = len(conteudo)
-    
-        if tamanho_bytes > MAX_SIZE_BYTES:
+        
+        if tamanho_bytes > cls.MAX_SIZE_BYTES:
             raise HTTPException(
-                status_code=400,
-                detail=f"Arquivo muito grande. Máximo {MAX_SIZE_MB}MB"
+                400,
+                f"Arquivo muito grande. Máximo {cls.MAX_SIZE_MB}MB"
             )
-
-        await image.seek(0)
-
-        return image
+        
+        # 4. Reseta o cursor
+        await file.seek(0)
+        
+        return conteudo, extensao
