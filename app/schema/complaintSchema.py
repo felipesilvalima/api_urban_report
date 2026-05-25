@@ -1,5 +1,6 @@
 from pydantic import BaseModel,field_validator,validator
 from app.domain.enums.category_enums import CategoryEnum
+from app.domain.enums.report_status_enums import ReportStatusEnum
 from fastapi import HTTPException, UploadFile
 from typing import Optional
 import re
@@ -127,3 +128,12 @@ class ImageValidator:
         await file.seek(0)
         
         return conteudo, extensao
+
+
+
+class ComplaintFilterSchema(BaseModel):
+
+    category: Optional[CategoryEnum] = None
+    status: Optional[ReportStatusEnum] = None
+    page: Optional[int] = None
+    limit: Optional[int] = None

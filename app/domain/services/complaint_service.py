@@ -1,7 +1,8 @@
 
 from app.domain.services.cep import Cep
 from app.domain.services.cpf import Cpf
-from app.exeception.domain.complaint_domain_execption import ImageNotFound
+from app.exeception.domain.complaint_domain_execption import ComplaintNotFound, ImageNotFound
+from app.infrastructure.build.complaint_build import ComplaintBuild
 from app.infrastructure.repository.complaint_repository import ComplaintRepository
 from app.models.models import Address, Complaint
 from sqlalchemy.orm import Session
@@ -11,7 +12,25 @@ from app.main import bucket_name, minio_client
 class ComplaintService:
     def __init__(self, session: Session):
         self.complaint_repository = ComplaintRepository(session=session)
-        self.cep_service = Cep()
+        self.cep_service = Cep(),
+        self.db = session
+
+    def list_comaplaint_service(self, complaintFilterSchema):
+        
+        query = (
+                    ComplaintBuild(self.db.query(Complaint))
+                    .filter_category(complaintFilterSchema.category)
+                    .filter_status(complaintFilterSchema.status)
+                    .filter_by_pagination(complaintFilterSchema.page,complaintFilterSchema.limit)
+                    .build()
+                )
+
+        complaints = query.all()
+
+        if not complaints:
+            raise ComplaintNotFound("Nenhuma denúncia encontrada.")
+
+        return complaints
 
     def create_comaplaint_service(self, complaintSchema):
 
