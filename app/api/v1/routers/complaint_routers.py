@@ -1,4 +1,5 @@
 from app.domain.services.complaint_service import ComplaintService
+from app.schema.complaintSchema import ComaplaintSchema
 from fastapi import APIRouter, Depends,HTTPException
 from app.infrastructure.database.connect_database import get_session
 from sqlalchemy.orm import Session
@@ -17,6 +18,7 @@ def instancia_complaint(session: Session = Depends(get_session)):
 
 @complaint_router.post("/")
 async def create_new_complaint(
+    complaintSchema: ComaplaintSchema,
     complaint_service: ComplaintService = Depends(instancia_complaint)
 ):
     return complaint_service.create_comaplaint_service()
