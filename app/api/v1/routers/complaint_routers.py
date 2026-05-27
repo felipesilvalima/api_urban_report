@@ -31,8 +31,20 @@ async def create_new_complaint(
 async def list_complaiment(
     complaintFilterSchema: ComplaintFilterSchema = Depends(),
     complaint_service: ComplaintService = Depends(instancia_complaint),
+    user_loggin: User = Depends(verify_token)
     
 ):
     complaments = complaint_service.list_comaplaint_service(complaintFilterSchema)
 
     return complaments,200
+
+
+@complaint_router.get("/{complaint_id}")
+async def details_complaiment(
+    complaint_id: int,
+    complaint_service: ComplaintService = Depends(instancia_complaint),
+    
+):
+    details = complaint_service.details_complaint_service(complaint_id)
+
+    return details,200

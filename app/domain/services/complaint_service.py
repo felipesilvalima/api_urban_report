@@ -32,6 +32,16 @@ class ComplaintService:
 
         return complaints
 
+    def details_complaint_service(self, complaint_id: int):
+        
+        details = self.complaint_repository.filter_repository([Complaint.id == complaint_id]).first()
+
+        if not details:
+            raise ComplaintNotFound("Denúncia não encontrada.")
+
+        return details
+        
+
     def create_comaplaint_service(self, complaintSchema):
 
         # Buscar cep da denúncia
