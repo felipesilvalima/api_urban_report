@@ -130,6 +130,14 @@ class ImageValidator:
         return conteudo, extensao
 
 
+class ComplaintStatusSchema(BaseModel):
+    status: ReportStatusEnum
+
+    @field_validator("status")
+    def status_validater(cls, status):
+        if status.name == ReportStatusEnum.PENDING.name:
+            raise HTTPException(status_code=400, detail=f"Status inválido. Não e permitido alterar para status {status.name}")
+        return status.name
 
 class ComplaintFilterSchema(BaseModel):
 

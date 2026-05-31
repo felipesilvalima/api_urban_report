@@ -14,3 +14,12 @@ class ComplaintRepository(RepostiroyBase):
            return cpf
        
        return False
+
+    
+    def search_complaint(self, complaint_id: int):
+       complaint = self.filter_repository([Complaint.id == complaint_id]).first()
+
+       if complaint:
+           return complaint
+       
+       return False

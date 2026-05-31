@@ -1,6 +1,6 @@
 from app.domain.services.complaint_service import ComplaintService
 from app.models.models import User
-from app.schema.complaintSchema import ComplaintFilterSchema, ComaplaintSchema
+from app.schema.complaintSchema import ComplaintFilterSchema, ComaplaintSchema, ComplaintStatusSchema
 from fastapi import APIRouter, Depends,HTTPException
 from app.infrastructure.database.connect_database import get_session
 from sqlalchemy.orm import Session
@@ -34,7 +34,7 @@ async def list_complaiment(
     user_loggin: User = Depends(verify_token)
     
 ):
-    complaments = complaint_service.list_comaplaint_service(complaintFilterSchema)
+    complaments = complaint_service.list_comaplaint_service(complaintFilterSchema,user_loggin)
 
     return complaments,200
 
@@ -43,8 +43,21 @@ async def list_complaiment(
 async def details_complaiment(
     complaint_id: int,
     complaint_service: ComplaintService = Depends(instancia_complaint),
-    
+    user_loggin: User = Depends(verify_token)
 ):
-    details = complaint_service.details_complaint_service(complaint_id)
+    details = complaint_service.details_complaint_service(complaint_id, user_loggin)
 
     return details,200
+
+
+
+@complaint_router.patch("/{complaint_id}/status")
+async def status_complaiment(
+    complaint_id: int,
+    status: ComplaintStatusSchema,
+    complaint_service: ComplaintService = Depends(instancia_complaint),
+    user_loggin: User = Depends(verify_token)
+):
+    altered_status = complaint_service.alter_status_service(complaint_id, status.status, user_loggin)
+
+    return altered_status,200
