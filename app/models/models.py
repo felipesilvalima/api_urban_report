@@ -1,3 +1,4 @@
+from app.exeception.domain.complaint_domain_execption import ComplaintStatusInvalid
 from sqlalchemy.sql import func
 from app.domain.enums.category_enums import CategoryEnum
 from app.domain.enums.report_status_enums import ReportStatusEnum
@@ -79,7 +80,7 @@ class Complaint(Base):
             latitude:float,
             image_url: str,
             description: str | None = None,
-            status: ReportStatusEnum = ReportStatusEnum.PENDING.value
+            status: ReportStatusEnum = ReportStatusEnum.PENDING
         ):
 
         self.__validateCPf(cpf)
@@ -106,6 +107,36 @@ class Complaint(Base):
         
         self.cpf = str(cpf)
 
+
+    def ansalysing(self):
+
+        if self.status.name is ReportStatusEnum.ANALYSING.name:
+            raise ComplaintStatusInvalid(f"Essa Denúncia já está em um processo de {self.status.name}")
+
+        if not self.status.name is ReportStatusEnum.PENDING.name:
+            raise ComplaintStatusInvalid(f"A denúncia não pode ser {ReportStatusEnum.ANALYSING.name} está no estado {self.status.name}")
+
+        self.status = ReportStatusEnum.ANALYSING
+
+        self._touch()
+
+    def resolved(self):
+        
+        if not self.status.name is ReportStatusEnum.ANALYSING.name:
+            raise ComplaintStatusInvalid(f"Essa Denúncia está {self.status.name}")
+
+        self.status = ReportStatusEnum.RESOLVED
+
+        self._touch()
+
+    def rejected(self):
+        if self.status.name in [ReportStatusEnum.RESOLVED.name,ReportStatusEnum.REJECTED.name ]:
+            raise ComplaintStatusInvalid(f"Essa Denúncia já foi {self.status.name}")
+
+        self.status = ReportStatusEnum.REJECTED
+
+        self._touch()
+
     # auditoria #
     def _touch(self):
         self.updated_at = datetime.utcnow()
@@ -117,15 +148,17 @@ class Address(Base):
  
     id = Column(Integer, primary_key=True, autoincrement=True)
     complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=False, unique=True)
-    street = Column(String(150), nullable=True)
+    street = Column(String(150), nullable=False)
+    neighborhood = Column(String(250),   nullable=False)
     city = Column(String(100), nullable=False)
     state = Column(String(2),   nullable=False)
  
     complaint = relationship("Complaint", back_populates="address")
  
-    def __init__(self, report_id: int, city: str, state: str, street: str | None = None):
-        self.report_id = report_id
+    def __init__(self, complaint_id: int, city: str, state: str,neighborhood: str, street: str | None = None):
+        self.complaint_id = complaint_id
         self.street = street
+        self.neighborhood = neighborhood
         self.city = city
         self.state = state       
 
