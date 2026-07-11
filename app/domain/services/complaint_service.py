@@ -2,7 +2,7 @@
 from app.domain.enums.report_status_enums import ReportStatusEnum
 from app.domain.services.cep import Cep
 from app.domain.services.cpf import Cpf
-from app.exeception.domain.complaint_domain_execption import ComplaintNotFound, ComplaintStatusInvalid, ImageNotFound
+from app.exeception.domain.complaint_domain_execption import ComplaintConflict, ComplaintNotFound, ComplaintStatusInvalid, ImageNotFound
 from app.exeception.domain.user_domain_exeception import AuthNotAuthorized
 from app.infrastructure.build.complaint_build import ComplaintBuild
 from app.infrastructure.repository.complaint_repository import ComplaintRepository
@@ -10,11 +10,11 @@ from app.models.models import Address, Complaint, User
 from sqlalchemy.orm import Session
 from minio import Minio
 from minio.error import S3Error
-from app.main import bucket_name, minio_client
+from app.main import MAX_COMPLAINTS_PER_CPF, bucket_name, minio_client
 class ComplaintService:
     def __init__(self, session: Session):
         self.complaint_repository = ComplaintRepository(session=session)
-        self.cep_service = Cep(),
+        self.cep_service = Cep()
         self.db = session
 
     def list_comaplaint_service(self, complaintFilterSchema, user_loggin: User):
@@ -84,9 +84,12 @@ class ComplaintService:
 
     def create_comaplaint_service(self, complaintSchema):
 
+        if self.complaint_repository.count_by_cpf_today(complaintSchema.cpf) >= MAX_COMPLAINTS_PER_CPF:
+            raise ComplaintConflict(f"Este CPF já atingiu o limite de {MAX_COMPLAINTS_PER_CPF} denúncias por dia.")
+
         # Buscar cep da denúncia
         address = self.cep_service.search_cep(complaintSchema.cep)
-         
+
         if not self.__verify_image_exist(minio_client=minio_client, bucket=bucket_name, object_name=complaintSchema.image_path):
             raise ImageNotFound("Imagem não encotrada na base de arquivos.")
         

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urban Report - Gerenciar Denúncias</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">🏙️</span>
+        <span>Urban Report</span>
+      </div>
+      <div class="header-right">
+        <span id="user-email" class="user-email"></span>
+        <button id="logout-btn" class="btn-secondary">Sair</button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <h1>Gerenciar denúncias</h1>
+
+      <section class="filters">
+        <div class="field inline">
+          <label for="filter-category">Categoria</label>
+          <select id="filter-category">
+            <option value="">Todas</option>
+          </select>
+        </div>
+
+        <div class="field inline">
+          <label for="filter-status">Status</label>
+          <select id="filter-status">
+            <option value="">Todos</option>
+          </select>
+        </div>
+
+        <div class="field inline">
+          <label for="filter-limit">Por página</label>
+          <select id="filter-limit">
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+
+        <button id="apply-filters" class="btn-primary btn-inline">Filtrar</button>
+        <button id="clear-filters" class="btn-secondary btn-inline">Limpar</button>
+
+        <span class="filters-spacer"></span>
+
+        <button id="refresh-btn" class="btn-secondary btn-inline" title="Recarregar denúncias">🔄 Atualizar</button>
+      </section>
+
+      <div id="list-status" class="list-status"></div>
+
+      <section id="table-section" class="table-wrap">
+        <table class="complaints-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Categoria</th>
+              <th>Status</th>
+              <th>CPF</th>
+              <th>Criada em</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="complaints-tbody"></tbody>
+        </table>
+      </section>
+
+      <div class="pagination">
+        <button id="prev-page" class="btn-secondary">‹ Anterior</button>
+        <span id="page-indicator">Página 1</span>
+        <button id="next-page" class="btn-secondary">Próxima ›</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Painel de detalhes -->
+  <div id="detail-overlay" class="overlay hidden">
+    <div class="detail-panel">
+      <div class="detail-header">
+        <h2 id="detail-title">Denúncia</h2>
+        <button id="close-detail" class="btn-close" aria-label="Fechar">✕</button>
+      </div>
+      <div id="detail-body" class="detail-body"></div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
