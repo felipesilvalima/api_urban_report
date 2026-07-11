@@ -44,30 +44,24 @@ class RepostiroyBase(ABC):
 
         return data
     
-    # repositorio de registro 
+    # repositorio de registro
     def register_repository(self, new_object):
-        try:
-            self.db.add(new_object)
-            self.db.commit()
-            self.db.refresh(new_object)
+        self.db.add(new_object)
+        self.db.commit()
+        self.db.refresh(new_object)
 
-            logging.info("Objeto registrado com sucesso")
+        logging.info("Objeto registrado com sucesso")
 
-            return new_object
-        except:
-            logging.error(f"Error ao tentar registrar objeto {new_object}")
+        return new_object
 
     # repositorio de salvar
     def save_repository(self, object_saved):
-        try:
-            self.db.commit()
-            self.db.refresh(object_saved)
+        self.db.commit()
+        self.db.refresh(object_saved)
 
-            logging.info("Dados salvos com sucesso")
+        logging.info("Dados salvos com sucesso")
 
-            return object_saved   
-        except:
-            logging.error("Error ao tentar salvar dados")
+        return object_saved
 
     
     def search_for_ids(self, ids: list[int]):

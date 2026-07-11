@@ -10,12 +10,11 @@ from app.infrastructure.storage.minio_init import MinioInit
 SECRET_KEY = str(os.getenv("SECRET_KEY")) # VARIVEIS DE AMBEINTES
 ALGORITHM = os.getenv("ALGORITHM")
 ACESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACESS_TOKEN_EXPIRE_MINUTES"))
-SECONDS_PER_DAY = int(os.getenv("SECONDS_PER_DAY"))
-REQUEST_LIMITER = int(os.getenv("REQUEST_LIMITER"))
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
 MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
 MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY")
 MINIO_BUCKET = os.getenv("MINIO_BUCKET")
+MAX_COMPLAINTS_PER_CPF = int(os.getenv("MAX_COMPLAINTS_PER_CPF"))
 
 app = FastAPI()
 

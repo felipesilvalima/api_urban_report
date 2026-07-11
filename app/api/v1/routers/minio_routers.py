@@ -7,12 +7,9 @@ from fastapi import APIRouter, Depends,HTTPException,UploadFile,File
 from app.infrastructure.database.connect_database import get_session
 from sqlalchemy.orm import Session
 from app.middleware.verify_token import verify_token
-from fastapi_throttle import RateLimiter
-from app.main import SECONDS_PER_DAY,REQUEST_LIMITER,MINIO_BUCKET,minio_client
+from app.main import MINIO_BUCKET,minio_client
 
-limiter = RateLimiter(times=REQUEST_LIMITER, seconds=SECONDS_PER_DAY)
-
-minio_router = APIRouter(prefix="/api/minio", tags=['api/minio'], dependencies=[Depends(limiter)])
+minio_router = APIRouter(prefix="/api/minio", tags=['api/minio'])
 
 def instancia_minio():
     return MinioService(minio_client, MINIO_BUCKET)

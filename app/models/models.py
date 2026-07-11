@@ -57,7 +57,7 @@ class Complaint(Base):
     __tablename__ = "complaints"
 
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    cpf = Column(String(13), nullable=False, unique=True)
+    cpf = Column(String(13), nullable=False)
     category = Column(Enum(CategoryEnum, name="category"), nullable=False)
     status = Column(Enum(ReportStatusEnum, name="report_status"), nullable=True, server_default=ReportStatusEnum.PENDING.value)
     

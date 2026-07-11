@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urban Report - Fazer Denúncia</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon">🏙️</span>
+        <span>Urban Report</span>
+      </div>
+      <p class="subtitle">Registre problemas urbanos da sua cidade</p>
+    </header>
+
+    <main class="card">
+      <h1>Fazer uma denúncia</h1>
+      <p class="hint">Preencha os dados abaixo. Sua identificação (CPF) é usada apenas para evitar denúncias duplicadas ou abusivas.</p>
+
+      <form id="complaint-form" novalidate>
+        <div class="field">
+          <label for="cpf">CPF *</label>
+          <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14" required />
+          <span class="field-hint" id="cpf-hint"></span>
+          <span class="error" data-error-for="cpf"></span>
+        </div>
+
+        <div class="field">
+          <label for="cep">CEP do local *</label>
+          <input type="text" id="cep" name="cep" placeholder="00000-000" maxlength="9" required />
+          <span class="error" data-error-for="cep"></span>
+        </div>
+
+        <div class="field">
+          <label for="category">Categoria *</label>
+          <select id="category" name="category" required>
+            <option value="" disabled selected>Selecione o tipo de problema</option>
+          </select>
+          <span class="error" data-error-for="category"></span>
+        </div>
+
+        <div class="field">
+          <label for="description">Descrição</label>
+          <textarea id="description" name="description" maxlength="200" rows="4" placeholder="Descreva o problema (opcional)"></textarea>
+          <span class="char-count"><span id="desc-count">0</span>/200</span>
+          <span class="error" data-error-for="description"></span>
+        </div>
+
+        <div class="field">
+          <label for="image">Foto do problema *</label>
+          <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/gif,image/webp" required />
+          <span class="field-hint">JPG, PNG, GIF ou WEBP — máximo 5MB</span>
+          <span class="error" data-error-for="image"></span>
+          <img id="image-preview" class="image-preview hidden" alt="Pré-visualização da imagem" />
+        </div>
+
+        <button type="submit" id="submit-btn" class="btn-primary">
+          <span id="submit-label">Enviar denúncia</span>
+          <span id="submit-spinner" class="spinner hidden"></span>
+        </button>
+      </form>
+
+      <div id="result" class="result hidden"></div>
+    </main>
+
+    <footer class="footer">
+      <a href="../admin/index.html">Área administrativa</a>
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
