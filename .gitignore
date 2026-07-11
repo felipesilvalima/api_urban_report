@@ -9,8 +9,8 @@ venv/
 .env
 .venv
 *.egg-info/
-dist/
-build/
+/dist/
+/build/
 
 # IDE
 .vscode/
@@ -39,7 +39,7 @@ build/
 .env.*.local
 
 # Logs
-logs/
+/logs/
 *.log
 
 # Testing
